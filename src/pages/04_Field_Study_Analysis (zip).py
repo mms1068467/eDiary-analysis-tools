@@ -9,6 +9,10 @@ from HumanSensing_Visualization import map_loader as ml
 from HumanSensing_Preprocessing import process_zip_files as pzf
 
 @st.cache_data
+def convert_df_to_csv(df):
+    return df.to_csv().encode('utf-8')
+
+@st.cache_data
 def MOS_analysis_fieldstudy_folder(read_zip_files):
     output_noNa, combined_output = pzf.MOS_analysis_fieldstudy_folder(read_zip_files)
 
@@ -74,6 +78,12 @@ if uploaded_zip_files is not None:
             st.subheader("Sensor Data for all .sqlite files in .zip folder")
             st.write(combined_sensor_data)
 
+            if st.checkbox("Download combined sensor measurements as CSV"):
+                csv_to_download_combined_sensor_data = convert_df_to_csv(combined_sensor_data)
+                st.download_button("Start Sensor Data Download", csv_to_download_combined_sensor_data, "combined_sensor_data" + ".csv",
+                                           key='download-csv')
+                st.write("Saving file as", "combined_sensor_data" + ".csv")
+
         st.sidebar.subheader("Raw Sensor Measurements")
         # TODO - use the following script to get the raw measurements
         #https: // git.sbg.ac.at / geo - social - analytics / human_sensing / human - sensing / - / blob / MLvsRuleMOSdetection / src / Automation / raw_data_to_csv.py
@@ -88,6 +98,12 @@ if uploaded_zip_files is not None:
             st.subheader("Location Data for all .sqlite files in .zip folder")
             st.write(combined_location_data)
 
+            if st.checkbox("Download combined location data as CSV"):
+                csv_to_download_combined_location_data = convert_df_to_csv(combined_location_data)
+                st.download_button("Start Location Data Download", csv_to_download_combined_location_data, "combined_location_data" + ".csv",
+                                           key='download-csv')
+                st.write("Saving file as", "combined_location_data" + ".csv")
+
         st.sidebar.subheader("Combined Survey (eDiary) Entries")
 
         show_combined_survey_data = st.sidebar.checkbox("Show combined survey data:")
@@ -97,6 +113,12 @@ if uploaded_zip_files is not None:
             combined_survey_data = survey_data_fieldstudy_folder(read_zip_files)
             st.subheader("Survey Data for all .sqlite files in .zip folder")
             st.write(combined_survey_data)
+
+            if st.checkbox("Download combined survey data as CSV"):
+                csv_to_download_combined_survey_data = convert_df_to_csv(combined_survey_data)
+                st.download_button("Start Survey Data Download", csv_to_download_combined_survey_data, "combined_survey_data" + ".csv",
+                                           key='download-csv')
+                st.write("Saving file as", "combined_survey_data" + ".csv")
 
 
         st.sidebar.title("Stress Analysis")
@@ -109,7 +131,7 @@ if uploaded_zip_files is not None:
 
         if kyriakou_2019:
 
-            st.subheader("Stress Detection based on Kyriakou et al. (2023)")
+            st.subheader("Stress Detection based on Kyriakou et al. (2019)")
             st.info("https://pubmed.ncbi.nlm.nih.gov/31484366/")
 
             # reads zip files, converges them into a single dataframe
@@ -120,6 +142,12 @@ if uploaded_zip_files is not None:
             number_of_mos_detected = len(MOS_analysis_fieldstudy_noNA[MOS_analysis_fieldstudy_noNA['MOS_score'] >= 75])
 
             st.write("Detected Number of MOS (overall): ", number_of_mos_detected)
+
+            if st.checkbox("Download MOS Output (Kyriakou et al. 2019) as CSV"):
+                csv_to_download_mos_kyriakou = convert_df_to_csv(MOS_analysis_fieldstudy_noNA)
+                st.download_button("Start Download Stress Output (Kyriakou et al. 2023)", csv_to_download_mos_kyriakou, "combined_MOS_output_Kyriakou2019" + ".csv",
+                                           key='download-csv')
+                st.write("Saving file as", "combined_MOS_output_Kyriakou2019" + ".csv")
 
         if moser_2023:
 
@@ -145,6 +173,12 @@ if uploaded_zip_files is not None:
             number_of_mos_detected = len(MOS_analysis_fieldstudy_noNA[MOS_analysis_fieldstudy_noNA['detectedMOS'] == 1])
 
             st.write("Detected Number of MOS (overall): ", number_of_mos_detected)
+
+            if st.checkbox("Download MOS Output (Moser et al. 2023) as CSV"):
+                csv_to_download_mos_moser = convert_df_to_csv(MOS_analysis_fieldstudy_noNA)
+                st.download_button("Start Download Stress Output (Moser et al. 2023)", csv_to_download_mos_moser, "combined_MOS_output_Moser2023" + ".csv",
+                                           key='download-csv')
+                st.write("Saving file as", "combined_MOS_output_Moser2023" + ".csv")
 
         # removes the temporary directory
         shutil.rmtree(read_zip_files)
