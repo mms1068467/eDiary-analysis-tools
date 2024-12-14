@@ -267,8 +267,11 @@ if uploaded_sqlite_file is not None:
 
                 MOS_detected = final_MOS_output[~final_MOS_output['MOS_score'].isna()]
 
-                fig = px.line(filtered_data, x='time_iso', y=['GSR', 'ST', 'IBI', 'HRV'], title="Preprocessed signals plot")
-
+                if 'IBI' in filtered_data.columns:
+                    fig = px.line(filtered_data, x='time_iso', y=['GSR', 'ST', 'IBI', 'HRV'], title="Preprocessed signals plot")
+                else:
+                    fig = px.line(filtered_data, x='time_iso', y=['GSR', 'ST'], title="Preprocessed signals plot")
+                    
                 # figMOS.update_layout(width=1500, height=600)
 
                 # adding detected MOS (stress moments)
