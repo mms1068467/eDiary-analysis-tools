@@ -334,29 +334,36 @@ if uploaded_sqlite_file is not None:
                 hour_diff_location_data = check_same_hour(location_data, final_MOS_output, datetime_column='time_iso')
                 
                 if np.sum(hour_diff_location_data) > 0:
-                    locations["time_iso"] = locations["time_iso"] - pd.Timedelta(hours=1)
+                    location_data["time_iso"] = location_data["time_iso"] - pd.Timedelta(hours=1)
                 else:
-                    locations["time_iso"] = locations["time_iso"] + pd.Timedelta(hours=1)
+                    location_data["time_iso"] = location_data["time_iso"] + pd.Timedelta(hours=1)
 
-                time_diff = (location_data['time_iso'].max() - final_MOS_output_geo[
-                    'time_iso'].max()).total_seconds() // 3600
+                # Merge the dataframes based on matching seconds
+                if 'time_iso' in location_data.columns:
+                    merged_df = merge_on_matching_seconds(final_MOS_output, location_data, datetime_column='iso_time')
+                    st.write(merged_df)
+                else:
+                    st.write("Merge problem - timestamp compatibility issue")
+
+                #time_diff = (location_data['time_iso'].max() - final_MOS_output_geo[
+                #    'time_iso'].max()).total_seconds() // 3600
                 # TODO - check if this works for all files
                 #  --> potentially use absolute value of time_diff if it is negative
-                if time_diff < 0:
-                    time_diff = 0
-                print("\nlocations", location_data['time_iso'].max())
-                print("MOS identified", final_MOS_output['time_iso'].max())
-                print("Time Difference:", time_diff)
-                final_MOS_output_geo['time_iso'] = pd.to_datetime(
-                    final_MOS_output_geo['time_iso']) + datetime.timedelta(
-                    hours=time_diff)
+                #if time_diff < 0:
+                #    time_diff = 0
+                #print("\nlocations", location_data['time_iso'].max())
+                #print("MOS identified", final_MOS_output['time_iso'].max())
+                #print("Time Difference:", time_diff)
+                #final_MOS_output_geo['time_iso'] = pd.to_datetime(
+                #    final_MOS_output_geo['time_iso']) + datetime.timedelta(
+                #    hours=time_diff)
 
-                if 'time_iso' in location_data.columns:
-                    merged = final_MOS_output_geo.merge(
-                        location_data[['time_iso', 'latitude', 'longitude', 'altitude', 'speed']],
-                        left_on='time_iso', right_on='time_iso', how='left')
-                else:
-                    print("Merge problem - timestamp compatibility issue")
+                #if 'time_iso' in location_data.columns:
+                #    merged = final_MOS_output_geo.merge(
+                #        location_data[['time_iso', 'latitude', 'longitude', 'altitude', 'speed']],
+                #        left_on='time_iso', right_on='time_iso', how='left')
+                #else:
+                #    print("Merge problem - timestamp compatibility issue")
 
                 csv_to_download2 = convert_df_to_csv(merged)
                 st.write(merged)
@@ -462,6 +469,10 @@ if uploaded_sqlite_file is not None:
             #MOS_output_ordered = MOS_gsr_and_st_clean[["time_iso", "TimeNum", "GSR", "GSR_standardized", "ST", "ST_standardized",
             #                                           "HRV", "hrv_filtered", "rmsnn", "sdnn", "IBI", "filtered_IBI", "MOS_Score", "detectedMOS"]]
             #st.write(MOS_gsr_and_st_clean)
+            
+            # new version
+            MOS_detected = MOS_gsr_and_st_clean[MOS_gsr_and_st_clean['detectedMOS'] > 0]
+            st.write(MOS_detected)
 
             moser_2023_visualize_mos = st.checkbox("Visualize MOS based on Moser et al. (2023)")
 
@@ -471,10 +482,7 @@ if uploaded_sqlite_file is not None:
 
                 # older version
                 #MOS_detected = MOS_output_ordered[~MOS_output_ordered['MOS_Score'].isna()]
-                # new version
-                MOS_detected = MOS_gsr_and_st_clean[MOS_gsr_and_st_clean['detectedMOS'] > 0]
 
-                st.write(MOS_detected)
 
                 if 'IBI' in filtered_data.columns:
                     figM = px.line(filtered_data, x='time_iso', y=['GSR', 'ST', 'IBI', 'HRV'], title="Preprocessed signals plot")
