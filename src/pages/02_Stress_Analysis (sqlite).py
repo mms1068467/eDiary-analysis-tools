@@ -354,11 +354,13 @@ if uploaded_sqlite_file is not None:
                 final_MOS_output_geo['time_iso'] = pd.to_datetime(final_MOS_output_geo['time_iso'])
                 location_data['time_iso'] = pd.to_datetime(location_data['time_iso'])
 
-                st.write(location_data)
+                #st.write(location_data)
 
-                st.write(final_MOS_output_geo)
+                #st.write(final_MOS_output_geo)
 
                 hour_diff_location_data = check_same_hour(location_data, final_MOS_output_geo, datetime_column='time_iso')
+
+                st.write(np.sum(hour_diff_location_data))
                 
                 if np.sum(hour_diff_location_data) > 0:
                     location_data["time_iso"] = location_data["time_iso"] - pd.Timedelta(hours=1)
@@ -367,7 +369,7 @@ if uploaded_sqlite_file is not None:
 
                 # Merge the dataframes based on matching seconds
                 if 'time_iso' in location_data.columns:
-                    merged_df = merge_on_matching_seconds(final_MOS_output_geo, location_data, datetime_column='iso_time')
+                    merged_df = merge_on_matching_seconds(final_MOS_output_geo, location_data, datetime_column='time_iso')
                     st.write(merged_df)
                 else:
                     st.write("Merge problem - timestamp compatibility issue")
