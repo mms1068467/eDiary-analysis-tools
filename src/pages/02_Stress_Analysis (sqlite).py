@@ -439,7 +439,10 @@ if uploaded_sqlite_file is not None:
                 # MOS_csv_file = pd.read_csv(path + "MOS_output_" + uploaded_data_files.name + ".csv")
                 # MOS_detected = MOS_csv_file[~MOS_csv_file['MOS_score'].isna()]
 
-                MOS_detected = MOS_output_ordered[~MOS_output_ordered['MOS_Score'].isna()]
+                # older version
+                #MOS_detected = MOS_output_ordered[~MOS_output_ordered['MOS_Score'].isna()]
+                # new version
+                MOS_detected = MOS_output_ordered[MOS_output_ordered['MOS_Score'] > MOS_thresh]
 
                 st.write(MOS_detected)
 
