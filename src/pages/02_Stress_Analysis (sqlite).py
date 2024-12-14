@@ -47,6 +47,29 @@ def check_same_hour(df1: pd.DataFrame, df2: pd.DataFrame, datetime_column: str) 
     
     return same_hour
 
+def merge_on_matching_seconds(df1: pd.DataFrame, df2: pd.DataFrame, datetime_column: str) -> pd.DataFrame:
+    """
+    Merges two DataFrames based on matching seconds in the datetime column.
+    
+    :param df1: First pandas DataFrame.
+    :param df2: Second pandas DataFrame.
+    :param datetime_column: The name of the datetime column in both DataFrames.
+    :return: A merged pandas DataFrame based on matching seconds.
+    """
+    
+    # Ensure datetime columns are in pandas datetime format
+    df1[datetime_column] = pd.to_datetime(df1[datetime_column])
+    df2[datetime_column] = pd.to_datetime(df2[datetime_column])
+    
+    # Round the datetime values to the nearest second by using .dt.floor('S')
+    df1[datetime_column] = df1[datetime_column].dt.floor('S')
+    df2[datetime_column] = df2[datetime_column].dt.floor('S')
+    
+    # Merge the dataframes on the datetime column
+    merged_df = pd.merge(df1, df2, on=datetime_column, how='left')
+    
+    return merged_df
+
 @st.cache_data
 def convert_df_to_csv(df):
     return df.to_csv().encode('utf-8')
@@ -485,9 +508,9 @@ if uploaded_sqlite_file is not None:
 
 
                 if 'IBI' in filtered_data.columns:
-                    figM = px.line(filtered_data, x='time_iso', y=['GSR', 'ST', 'IBI', 'HRV'], title="Preprocessed signals plot")
+                    figM = px.line(filtered_data_moser, x='time_iso', y=['GSR', 'ST', 'IBI', 'HRV'], title="Preprocessed signals plot")
                 else:
-                    figM = px.line(filtered_data, x='time_iso', y=['GSR', 'ST'], title="Preprocessed signals plot")
+                    figM = px.line(filtered_data_moser, x='time_iso', y=['GSR', 'ST'], title="Preprocessed signals plot")
                  
                 # figMOS.update_layout(width=1500, height=600)
 
