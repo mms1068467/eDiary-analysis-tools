@@ -441,6 +441,8 @@ if uploaded_sqlite_file is not None:
 
                 MOS_detected = MOS_output_ordered[~MOS_output_ordered['MOS_Score'].isna()]
 
+                st.write(MOS_detected)
+
                 if 'IBI' in filtered_data.columns:
                     figM = px.line(filtered_data, x='time_iso', y=['GSR', 'ST', 'IBI', 'HRV'], title="Preprocessed signals plot")
                 else:
