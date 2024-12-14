@@ -354,9 +354,9 @@ if uploaded_sqlite_file is not None:
                 final_MOS_output_geo['time_iso'] = pd.to_datetime(final_MOS_output_geo['time_iso'])
                 location_data['time_iso'] = pd.to_datetime(location_data['time_iso'])
 
-                st.write(location_data)
+                #st.write(location_data)
 
-                st.write(final_MOS_output_geo)
+                #st.write(final_MOS_output_geo)
 
                 hour_diff_location_data = check_same_hour(location_data, final_MOS_output_geo, datetime_column='time_iso')
 
@@ -398,7 +398,7 @@ if uploaded_sqlite_file is not None:
                 #else:
                 #    print("Merge problem - timestamp compatibility issue")
 
-                csv_to_download2 = convert_df_to_csv(merged)
+                csv_to_download2 = convert_df_to_csv(merged_df)
                 st.write(merged)
                 st.download_button("Start Download", csv_to_download2, uploaded_sqlite_file.name + ".csv",
                                            key='download-csv')
@@ -559,27 +559,48 @@ if uploaded_sqlite_file is not None:
                 final_MOS_output_geo['time_iso'] = pd.to_datetime(final_MOS_output_geo['time_iso'])
                 location_data['time_iso'] = pd.to_datetime(location_data['time_iso'])
 
-                time_diff = (location_data['time_iso'].max() - final_MOS_output_geo[
-                    'time_iso'].max()).total_seconds() // 3600
+                hour_diff_location_data = check_same_hour(location_data, final_MOS_output_geo, datetime_column='time_iso')
+
+                #st.write(hour_diff_location_data)
+
+                st.write("Time difference between Sensor measurements and phone measurements is:")
+
+                st.write(hour_diff_location_data[0])
+                
+                if hour_diff_location_data[0] > 0:
+                    location_data["time_iso"] = location_data["time_iso"] - pd.Timedelta(hours=1)
+                else:
+                    location_data["time_iso"] = location_data["time_iso"] + pd.Timedelta(hours=1)
+
+                # Merge the dataframes based on matching seconds
+                if 'time_iso' in location_data.columns:
+                    merged_df = merge_on_matching_seconds(final_MOS_output_geo, location_data, datetime_column='time_iso')
+                    st.write(merged_df)
+                else:
+                    st.write("Merge problem - timestamp compatibility issue")
+                    
+
+                #time_diff = (location_data['time_iso'].max() - final_MOS_output_geo[
+                #    'time_iso'].max()).total_seconds() // 3600
                 # TODO - check if this works for all files
                 #  --> potentially use absolute value of time_diff if it is negative
-                if time_diff < 0:
-                    time_diff = 0
-                print("\nlocations", location_data['time_iso'].max())
-                print("MOS identified", MOS_output_ordered['time_iso'].max())
-                print("Time Difference:", time_diff)
-                final_MOS_output_geo['time_iso'] = pd.to_datetime(
-                    final_MOS_output_geo['time_iso']) + datetime.timedelta(
-                    hours=time_diff)
+                #if time_diff < 0:
+                #    time_diff = 0
+                #print("\nlocations", location_data['time_iso'].max())
+                #print("MOS identified", MOS_output_ordered['time_iso'].max())
+                #print("Time Difference:", time_diff)
+                #final_MOS_output_geo['time_iso'] = pd.to_datetime(
+                #    final_MOS_output_geo['time_iso']) + datetime.timedelta(
+                #    hours=time_diff)
 
-                if 'time_iso' in location_data.columns:
-                    merged = final_MOS_output_geo.merge(
-                        location_data[['time_iso', 'latitude', 'longitude', 'altitude', 'speed']],
-                        left_on='time_iso', right_on='time_iso', how='left')
-                else:
-                    print("Merge problem - timestamp compatibility issue")
+                #if 'time_iso' in location_data.columns:
+                #    merged = final_MOS_output_geo.merge(
+                #        location_data[['time_iso', 'latitude', 'longitude', 'altitude', 'speed']],
+                #        left_on='time_iso', right_on='time_iso', how='left')
+                #else:
+                #    print("Merge problem - timestamp compatibility issue")
 
-                csv_to_download4 = convert_df_to_csv(merged)
+                csv_to_download4 = convert_df_to_csv(merged_df)
                 st.write(merged)
                 st.download_button("Start Download", csv_to_download4, uploaded_sqlite_file.name + ".csv",
                                            key='download-csv')
