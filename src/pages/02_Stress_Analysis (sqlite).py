@@ -362,7 +362,9 @@ if uploaded_sqlite_file is not None:
 
                 st.write(hour_diff_location_data)
 
-                st.write(np.sum(hour_diff_location_data))
+                st.write(type(hour_diff_location_data))
+
+                st.write(hour_diff_location_data[0])
                 
                 if np.sum(hour_diff_location_data) > 0:
                     location_data["time_iso"] = location_data["time_iso"] - pd.Timedelta(hours=1)
