@@ -426,9 +426,9 @@ if uploaded_sqlite_file is not None:
 
             st.write("Number of MOS Detected: ", number_of_mos)
 
-            MOS_output_ordered = MOS_gsr_and_st_clean[["time_iso", "TimeNum", "GSR", "GSR_standardized", "ST", "ST_standardized",
-                                                       "HRV", "hrv_filtered", "rmsnn", "sdnn", "IBI", "filtered_IBI", "MOS_Score", "detectedMOS"]]
-            st.write(MOS_output_ordered)
+            #MOS_output_ordered = MOS_gsr_and_st_clean[["time_iso", "TimeNum", "GSR", "GSR_standardized", "ST", "ST_standardized",
+            #                                           "HRV", "hrv_filtered", "rmsnn", "sdnn", "IBI", "filtered_IBI", "MOS_Score", "detectedMOS"]]
+            st.write(MOS_gsr_and_st_clean)
 
             moser_2023_visualize_mos = st.checkbox("Visualize MOS based on Moser et al. (2023)")
 
