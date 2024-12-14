@@ -354,13 +354,13 @@ if uploaded_sqlite_file is not None:
                 final_MOS_output_geo['time_iso'] = pd.to_datetime(final_MOS_output_geo['time_iso'])
                 location_data['time_iso'] = pd.to_datetime(location_data['time_iso'])
 
-                #st.write(location_data)
+                st.write(location_data)
 
-                #st.write(final_MOS_output_geo)
+                st.write(final_MOS_output_geo)
 
                 hour_diff_location_data = check_same_hour(location_data, final_MOS_output_geo, datetime_column='time_iso')
 
-                st.write(np.sum(hour_diff_location_data))
+                st.write(hour_diff_location_data)
                 
                 if np.sum(hour_diff_location_data) > 0:
                     location_data["time_iso"] = location_data["time_iso"] - pd.Timedelta(hours=1)
