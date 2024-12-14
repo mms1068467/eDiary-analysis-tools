@@ -442,14 +442,14 @@ if uploaded_sqlite_file is not None:
                 # older version
                 #MOS_detected = MOS_output_ordered[~MOS_output_ordered['MOS_Score'].isna()]
                 # new version
-                MOS_detected = MOS_output_ordered[MOS_output_ordered['MOS_Score'] > MOS_thresh]
+                MOS_detected = MOS_gsr_and_st_clean[MOS_gsr_and_st_clean['detectedMOS'] > 0]
 
                 st.write(MOS_detected)
 
                 if 'IBI' in filtered_data.columns:
-                    figM = px.line(filtered_data, x='time_iso', y=['GSR', 'ST', 'IBI', 'HRV'], title="Preprocessed signals plot")
+                    figM = px.line(filtered_data_moser, x='time_iso', y=['GSR', 'ST', 'IBI', 'HRV'], title="Preprocessed signals plot")
                 else:
-                    figM = px.line(filtered_data, x='time_iso', y=['GSR', 'ST'], title="Preprocessed signals plot")
+                    figM = px.line(filtered_data_moser, x='time_iso', y=['GSR', 'ST'], title="Preprocessed signals plot")
                  
                 # figMOS.update_layout(width=1500, height=600)
 
@@ -476,15 +476,15 @@ if uploaded_sqlite_file is not None:
 
             # TODO - plain MOS without coordinates
             if st.checkbox("Download MOS as CSV"):
-                csv_to_download1 = convert_df_to_csv(MOS_output_ordered)
-                st.download_button("Start Download", csv_to_download1, uploaded_sqlite_file.name + ".csv",
+                csv_to_download3 = convert_df_to_csv(MOS_gsr_and_st_clean)
+                st.download_button("Start Download", csv_to_download3, uploaded_sqlite_file.name + ".csv",
                                            key='download-csv')
                 st.write("Saved file as", uploaded_sqlite_file.name + ".csv")
 
 
             # TODO - geo-referenced MOS
             if st.checkbox("Download geo-coded MOS as CSV"):
-                final_MOS_output_geo = MOS_output_ordered.copy()
+                final_MOS_output_geo = MOS_gsr_and_st_clean.copy()
                 final_MOS_output_geo['time_iso'] = pd.to_datetime(final_MOS_output_geo['time_iso'])
                 location_data['time_iso'] = pd.to_datetime(location_data['time_iso'])
 
@@ -508,9 +508,9 @@ if uploaded_sqlite_file is not None:
                 else:
                     print("Merge problem - timestamp compatibility issue")
 
-                csv_to_download2 = convert_df_to_csv(merged)
+                csv_to_download4 = convert_df_to_csv(merged)
                 st.write(merged)
-                st.download_button("Start Download", csv_to_download2, uploaded_sqlite_file.name + ".csv",
+                st.download_button("Start Download", csv_to_download4, uploaded_sqlite_file.name + ".csv",
                                            key='download-csv')
                 st.write("Save file as", uploaded_sqlite_file.name + ".csv")
 
