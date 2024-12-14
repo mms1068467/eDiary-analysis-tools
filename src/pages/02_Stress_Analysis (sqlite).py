@@ -24,6 +24,29 @@ from MOS_Detection import MOS_rules_NEW as MOS_paper_new
 #import MOS_Detection.MOS_rules_NEW as MOS_paper_new
 
 
+def check_same_hour(df1: pd.DataFrame, df2: pd.DataFrame, datetime_column: str) -> pd.Series:
+    """
+    Compares the 'datetime' columns in two DataFrames and checks if they have the same hour.
+
+    :param df1: First pandas DataFrame.
+    :param df2: Second pandas DataFrame.
+    :param datetime_column: The name of the datetime column in both DataFrames.
+    :return: A pandas Series of boolean values indicating whether the hours match.
+    """
+    
+    # Ensure datetime columns are in pandas datetime format
+    df1[datetime_column] = pd.to_datetime(df1[datetime_column])
+    df2[datetime_column] = pd.to_datetime(df2[datetime_column])
+    
+    # Extract the hour from both datetime columns
+    df1['hour'] = df1[datetime_column].dt.hour
+    df2['hour'] = df2[datetime_column].dt.hour
+    
+    # Compare the hours
+    same_hour = df1['hour'] - df2['hour']
+    
+    return same_hour
+
 @st.cache_data
 def convert_df_to_csv(df):
     return df.to_csv().encode('utf-8')
@@ -308,6 +331,13 @@ if uploaded_sqlite_file is not None:
                 final_MOS_output_geo['time_iso'] = pd.to_datetime(final_MOS_output_geo['time_iso'])
                 location_data['time_iso'] = pd.to_datetime(location_data['time_iso'])
 
+                hour_diff_location_data = check_same_hour(location_data, final_MOS_output, datetime_column='time_iso')
+                
+                if np.sum(hour_diff_location_data) > 0:
+                    locations["time_iso"] = locations["time_iso"] - pd.Timedelta(hours=1)
+                else:
+                    locations["time_iso"] = locations["time_iso"] + pd.Timedelta(hours=1)
+
                 time_diff = (location_data['time_iso'].max() - final_MOS_output_geo[
                     'time_iso'].max()).total_seconds() // 3600
                 # TODO - check if this works for all files
@@ -431,7 +461,7 @@ if uploaded_sqlite_file is not None:
 
             #MOS_output_ordered = MOS_gsr_and_st_clean[["time_iso", "TimeNum", "GSR", "GSR_standardized", "ST", "ST_standardized",
             #                                           "HRV", "hrv_filtered", "rmsnn", "sdnn", "IBI", "filtered_IBI", "MOS_Score", "detectedMOS"]]
-            st.write(MOS_gsr_and_st_clean)
+            #st.write(MOS_gsr_and_st_clean)
 
             moser_2023_visualize_mos = st.checkbox("Visualize MOS based on Moser et al. (2023)")
 
@@ -447,9 +477,9 @@ if uploaded_sqlite_file is not None:
                 st.write(MOS_detected)
 
                 if 'IBI' in filtered_data.columns:
-                    figM = px.line(filtered_data_moser, x='time_iso', y=['GSR', 'ST', 'IBI', 'HRV'], title="Preprocessed signals plot")
+                    figM = px.line(filtered_data, x='time_iso', y=['GSR', 'ST', 'IBI', 'HRV'], title="Preprocessed signals plot")
                 else:
-                    figM = px.line(filtered_data_moser, x='time_iso', y=['GSR', 'ST'], title="Preprocessed signals plot")
+                    figM = px.line(filtered_data, x='time_iso', y=['GSR', 'ST'], title="Preprocessed signals plot")
                  
                 # figMOS.update_layout(width=1500, height=600)
 
